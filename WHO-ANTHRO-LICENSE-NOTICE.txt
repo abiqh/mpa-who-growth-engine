@@ -1,0 +1,9 @@
+MPA Daycare WHO 0-5 Growth Engine
+
+Reference data and adapted computational logic are derived from the World Health Organization R package anthro.
+Source: https://github.com/WorldHealthOrganization/anthro
+Package license: GNU General Public License v3.0 (GPL-3.0).
+
+If you distribute this combined derivative, provide the complete corresponding source under GPL-3.0, retain copyright/license notices, and include the full GPL-3.0 license text. The original package LICENSE.md is available in the anthro repository.
+
+This file is an integration prototype and must be clinically/technically validated against WHO Anthro before public use.
