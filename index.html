@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MPA WHO Engine - Testing</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;padding:20px;
+  font-family:Arial,sans-serif;
+  background:#F3F6FA;color:#253047;
+}
+.container{max-width:700px;margin:auto}
+.header{
+  background:#1B265D;color:white;
+  padding:24px;border-radius:14px;
+  text-align:center;
+}
+.panel{
+  background:white;padding:20px;
+  margin-top:18px;border-radius:12px;
+  border:1px solid #e1e6ef;
+}
+h2{color:#1B265D}
+label{display:block;font-weight:bold;margin:12px 0 6px}
+input,select{
+  width:100%;padding:12px;
+  border:1px solid #ccd5e2;
+  border-radius:8px;font-size:15px;
+}
+button{
+  width:100%;padding:14px;margin-top:18px;
+  background:#1B265D;color:white;
+  border:0;border-radius:8px;
+  font-weight:bold;cursor:pointer;
+}
+.result{
+  display:none;background:#F1F8F4;
+  padding:16px;border-radius:10px;margin-top:18px;
+}
+.item{
+  padding:12px 0;border-bottom:1px solid #dce8df;
+}
+.value{font-size:22px;font-weight:bold;color:#1B265D}
+.note{font-size:12px;color:#68758a;line-height:1.6}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<div class="header">
+  <h2 style="color:white">MPA WHO Growth Engine</h2>
+  <p>Halaman Pengujian Mesin WHO 0–5 Tahun</p>
+  <small>MPA DAYCARE</small>
+</div>
+
+<div class="panel">
+<h2>Data Pengujian</h2>
+
+<label>Tanggal Lahir</label>
+<input type="date" id="birth" value="2024-01-01">
+
+<label>Jenis Kelamin</label>
+<select id="sex">
+  <option value="M">Laki-laki</option>
+  <option value="F">Perempuan</option>
+</select>
+
+<label>Tanggal Pengukuran</label>
+<input type="date" id="measure" value="2026-10-29">
+
+<label>Berat Badan (kg)</label>
+<input type="number" id="weight" value="12" step="0.01">
+
+<label>Panjang / Tinggi Badan (cm)</label>
+<input type="number" id="height" value="85" step="0.1">
+
+<label>Posisi Pengukuran</label>
+<select id="position">
+  <option value="standing">Berdiri</option>
+  <option value="lying">Telentang</option>
+</select>
+
+<button onclick="runTest()">JALANKAN PENGUJIAN WHO</button>
+</div>
+
+<div class="panel result" id="result">
+<h2>Hasil Pengujian</h2>
+<div id="output"></div>
+<p class="note">
+Hasil ini merupakan keluaran mesin pengujian.
+Belum merupakan hasil validasi independen WHO Anthro
+dan tidak digunakan untuk diagnosis medis.
+</p>
+</div>
+
+<div class="panel">
+<p class="note" id="engineStatus">
+Memeriksa koneksi mesin WHO...
+</p>
+</div>
+
+</div>
+
+<script src="https://abiqh.github.io/mpa-who-growth-engine/mpa-who-0-5-engine.js"></script>
+
+<script>
+const status=document.getElementById('engineStatus');
+
+if(window.MPAWHO0to5){
+  status.textContent='Mesin WHO berhasil dimuat. Versi: '+MPAWHO0to5.version;
+}else{
+  status.textContent='Mesin WHO belum berhasil dimuat. Periksa koneksi dan alamat file.';
+}
+
+function runTest(){
+  try{
+    if(!window.MPAWHO0to5){
+      throw new Error('Mesin WHO belum tersedia.');
+    }
+
+    const result=MPAWHO0to5.calculate({
+      birth:document.getElementById('birth').value,
+      measureDate:document.getElementById('measure').value,
+      sex:document.getElementById('sex').value,
+      weight:Number(document.getElementById('weight').value),
+      height:Number(document.getElementById('height').value),
+      position:document.getElementById('position').value
+    });
+
+    const labels={
+      wfa:'BB/U',
+      hfa:'PB/U atau TB/U',
+      wh:'BB/PB atau BB/TB',
+      bmi:'IMT/U'
+    };
+
+    let html='';
+    for(const key of Object.keys(labels)){
+      const item=result.indicators[key];
+      html+=`
+      <div class="item">
+        <strong>${labels[key]}</strong>
+        <div class="value">${
+          item.z===null?'Tidak tersedia':item.z.toFixed(2)
+        }</div>
+        <div>${item.category}</div>
+        ${item.flag?'<small>Perlu pemeriksaan ulang</small>':''}
+      </div>`;
+    }
+
+    html+=`
+      <p><strong>Usia:</strong> ${result.ageDays} hari</p>
+      <p><strong>IMT:</strong> ${result.bmi} kg/m²</p>
+      <p><strong>Tinggi terkoreksi:</strong>
+      ${result.heightAdjustedCm} cm</p>`;
+
+    document.getElementById('output').innerHTML=html;
+    document.getElementById('result').style.display='block';
+
+  }catch(error){
+    alert(error.message);
+  }
+}
+</script>
+</body>
+</html>
