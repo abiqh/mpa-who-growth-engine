@@ -19,18 +19,38 @@ const REF = {"wfa":[[1,0,0.3487,3.3464,0.14602],[1,1,0.3127,3.3174,0.14693],[1,2
   function roundHalfUp(x){return Math.floor(x+0.5);}
   function lookupAge(table, sex, age){return table.find(r=>r[0]===sex&&r[1]===age)||null;}
   function lookupLen(table,sex,len){return table.find(r=>r[0]===sex&&Math.abs(r[1]-len)<1e-8)||null;}
-  function zLms(y,row,adjusted){
-    if(!row||!(y>0)) return null;
-    const [L,M,S]=row.slice(2,5);
-    let z=(Math.pow(y/M,L)-1)/(S*L);
-    if(adjusted){
-      const sd=n=>M*Math.pow(1+L*S*n,1/L);
-      const p3=sd(3), n3=sd(-3), p2=sd(2), n2=sd(-2);
-      if(z>3) z=3+(y-p3)/(p3-p2);
-      if(z< -3) z=-3+(y-n3)/(n2-n3);
-    }
-    return Math.round(z*100)/100;
+  
+function zLms(y,row,adjusted){
+  if(!row || !(y>0)) return null;
+
+  const [L,M,S]=row.slice(2,5);
+  if(!(M>0 && S>0)) return null;
+
+  const nearZero=Math.abs(L)<1e-8;
+
+  let z=nearZero
+    ? Math.log(y/M)/S
+    : (Math.pow(y/M,L)-1)/(S*L);
+
+  if(adjusted){
+    const sd=n=>nearZero
+      ? M*Math.exp(S*n)
+      : M*Math.pow(1+L*S*n,1/L);
+
+    const p3=sd(3);
+    const n3=sd(-3);
+    const p2=sd(2);
+    const n2=sd(-2);
+
+    if(z>3) z=3+(y-p3)/(p3-p2);
+    if(z< -3) z=-3+(y-n3)/(n2-n3);
   }
+
+  if(!Number.isFinite(z)) return null;
+
+  return Math.round(z*100)/100;
+}
+
   function interpHeight(sex,height,kind){
     const table=kind==='wfl'?REF.wfl:REF.wfh;
     const lo=Math.floor(height*10+1e-8)/10, hi=Math.ceil(height*10-1e-8)/10;
