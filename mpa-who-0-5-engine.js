@@ -61,7 +61,7 @@ function zLms(y,row,adjusted){
   }
   function category(ind,z){
     if(z===null) return 'Tidak dapat dihitung';
-    if(ind==='wfa') return z < -3 ? 'Berat badan sangat kurang' : z < -2 ? 'Berat badan kurang' : 'Tidak berat badan kurang';
+    if(ind==='wfa') return z < -3 ? 'Berat badan sangat kurang' : z < -2 ? 'Berat badan kurang' : 'Tidak masuk kategori berat badan kurang';
     if(ind==='hfa') return z < -3 ? 'Sangat pendek' : z < -2 ? 'Pendek' : 'Normal';
     if(ind==='wfl'||ind==='bmi') return z < -3 ? 'Gizi buruk / sangat kurus' : z < -2 ? 'Gizi kurang / kurus' : z <= 1 ? 'Normal' : z <= 2 ? 'Berisiko gizi lebih' : z <= 3 ? 'Gizi lebih' : 'Obesitas';
     return 'Tidak tersedia';
